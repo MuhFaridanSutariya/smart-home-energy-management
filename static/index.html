@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Smart Home Energy Management</title>
     <link rel="stylesheet" href="/static/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <div class="container">
@@ -20,6 +21,7 @@
             <p><strong>Coordinates:</strong> <span id="coordinates"></span></p>
             <p><strong>Cells:</strong> <span id="cells"></span></p>
             <p><strong>Aggregator:</strong> <span id="aggregator"></span></p>
+            <canvas id="energyChart" width="400" height="200"></canvas>
         </div>
     </div>
     <script src="/static/script.js"></script>
