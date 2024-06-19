@@ -15,10 +15,15 @@ document.getElementById('queryForm').addEventListener('submit', async function(e
     if (response.ok) {
         const data = await response.json();
 
-        document.getElementById('answer').textContent = data.answer;
-        document.getElementById('coordinates').textContent = JSON.stringify(data.coordinates);
-        document.getElementById('cells').textContent = data.cells.join(', ');
-        document.getElementById('aggregator').textContent = data.aggregator;
+        const answer = data.answer.split('>')[1].trim();
+        const coordinates = JSON.stringify(data.coordinates);
+        const cells = data.cells.join(', ');
+        const aggregator = data.aggregator;
+
+        document.getElementById('answer').textContent = answer;
+        document.getElementById('coordinates').textContent = coordinates;
+        document.getElementById('cells').textContent = cells;
+        document.getElementById('aggregator').textContent = aggregator;
 
         document.getElementById('response').style.display = 'block';
     } else {
