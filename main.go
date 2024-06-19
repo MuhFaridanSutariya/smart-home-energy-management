@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
@@ -9,7 +10,9 @@ import (
 	"os"
 	"strings"
 
+	"github.com/google/generative-ai-go/genai"
 	"github.com/joho/godotenv"
+	"google.golang.org/api/option"
 )
 
 type AIModelConnector struct {
@@ -85,6 +88,35 @@ func (c *AIModelConnector) ConnectAIModel(payload interface{}, token string) (Re
 	return response, nil
 }
 
+func GenerateSummary(query string, table map[string][]string, apiKey string) (string, error) {
+	ctx := context.Background()
+	client, err := genai.NewClient(ctx, option.WithAPIKey(apiKey))
+	if err != nil {
+		return "", err
+	}
+
+	// Convert the table map to a string format suitable for the prompt
+	tableStr := ""
+	for key, values := range table {
+		tableStr += fmt.Sprintf("%s: %s\n", key, strings.Join(values, ", "))
+	}
+
+	// Create the prompt with the table data and the query
+	prompt := fmt.Sprintf("Given the following data:\n\n%s\n\n%s", tableStr, query)
+
+	model := client.GenerativeModel("gemini-1.5-flash")
+	resp, err := model.GenerateContent(
+		ctx,
+		genai.Text(prompt),
+	)
+	if err != nil {
+		return "", err
+	}
+
+	marshalResponse, _ := json.Marshal(resp)
+	return string(marshalResponse), nil
+}
+
 func handleQuery(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
@@ -97,9 +129,15 @@ func handleQuery(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token := os.Getenv("HUGGINGFACE_TOKEN")
-	if token == "" {
+	huggingfaceToken := os.Getenv("HUGGINGFACE_TOKEN")
+	if huggingfaceToken == "" {
 		http.Error(w, "HUGGINGFACE_TOKEN not set in .env file", http.StatusInternalServerError)
+		return
+	}
+
+	geminiToken := os.Getenv("GOOGLE_API_KEY")
+	if geminiToken == "" {
+		http.Error(w, "GOOGLE_API_KEY not set in .env file", http.StatusInternalServerError)
 		return
 	}
 
@@ -127,14 +165,29 @@ func handleQuery(w http.ResponseWriter, r *http.Request) {
 	}
 
 	connector := AIModelConnector{Client: &http.Client{}}
-	response, err := connector.ConnectAIModel(payload, token)
+	response, err := connector.ConnectAIModel(payload, huggingfaceToken)
 	if err != nil {
 		http.Error(w, "Error connecting to AI model", http.StatusInternalServerError)
 		return
 	}
 
+	// Generate summary using Gemini
+	summary, err := GenerateSummary(query, table, geminiToken)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Error generating summary: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	responseWithSummary := struct {
+		Response
+		Summary string `json:"summary"`
+	}{
+		Response: response,
+		Summary:  summary,
+	}
+
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
+	json.NewEncoder(w).Encode(responseWithSummary)
 }
 
 func main() {

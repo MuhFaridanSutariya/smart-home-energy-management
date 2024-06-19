@@ -22,11 +22,22 @@ document.getElementById('queryForm').addEventListener('submit', async function(e
         const coordinates = data.coordinates;
         const cells = data.cells;
         const aggregator = data.aggregator;
+        const summary = JSON.parse(data.summary); // Parse the summary JSON string
+
+        // Extract the summary text from the parsed summary
+        let summaryText = "";
+        if (summary.Candidates && summary.Candidates.length > 0) {
+            summaryText = summary.Candidates[0].Content.Parts.join(" ");
+        }
+
+        // Clean the summary text by removing symbols like '*'
+        summaryText = summaryText.replace(/\*/g, "");
 
         document.getElementById('answer').textContent = answer;
         document.getElementById('coordinates').textContent = JSON.stringify(coordinates);
         document.getElementById('cells').textContent = cells.join(', ');
         document.getElementById('aggregator').textContent = aggregator;
+        document.getElementById('summary').textContent = summaryText;
 
         document.getElementById('response').style.display = 'block';
 
@@ -35,6 +46,7 @@ document.getElementById('queryForm').addEventListener('submit', async function(e
         const energyData = cells.map(Number);
         const labels = coordinates.map(coord => `[${coord[0]},${coord[1]}]`);
 
+        // Destroy the previous chart instance if it exists
         if (chartInstance) {
             chartInstance.destroy();
         }
