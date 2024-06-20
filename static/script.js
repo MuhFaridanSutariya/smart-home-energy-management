@@ -3,6 +3,12 @@ let chartInstance = null;
 document.getElementById('queryForm').addEventListener('submit', async function(event) {
     event.preventDefault();
     const query = document.getElementById('query').value;
+    const loadingElement = document.getElementById('loading');
+    const responseElement = document.getElementById('response');
+
+    // Show loading animation
+    loadingElement.style.display = 'block';
+    responseElement.style.display = 'none';
 
     const response = await fetch('/query', {
         method: 'POST',
@@ -13,6 +19,9 @@ document.getElementById('queryForm').addEventListener('submit', async function(e
             query: query
         })
     });
+
+    // Hide loading animation
+    loadingElement.style.display = 'none';
 
     if (response.ok) {
         const data = await response.json();
@@ -39,7 +48,7 @@ document.getElementById('queryForm').addEventListener('submit', async function(e
         document.getElementById('aggregator').textContent = aggregator;
         document.getElementById('summary').textContent = summaryText;
 
-        document.getElementById('response').style.display = 'block';
+        responseElement.style.display = 'block';
 
         // Create a bar chart
         const ctx = document.getElementById('energyChart').getContext('2d');
