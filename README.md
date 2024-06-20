@@ -2,7 +2,7 @@
 
 ## Final Project AI-Powered Smart Home Energy Management System
 
-![image](https://github.com/MuhFaridanSutariya/smart-home-energy-management/assets/88027268/a8204937-056f-4720-8ba9-9f26169115e5)
+![Screenshot 2024-06-20 113954](https://github.com/MuhFaridanSutariya/smart-home-energy-management/assets/88027268/3b75a7ca-bfdb-41da-8d28-cad9f59e6f16)
 
 
 ### Description

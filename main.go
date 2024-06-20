@@ -172,7 +172,10 @@ func handleQuery(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Generate summary using Gemini
-	summary, err := GenerateSummary(query, table, geminiToken)
+	summary, err := GenerateSummary(
+		"Based on Data give recommendations on what tools can be used less to save energy. please format output using a list",
+		table,
+		geminiToken)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Error generating summary: %v", err), http.StatusInternalServerError)
 		return

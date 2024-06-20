@@ -46,7 +46,18 @@ document.getElementById('queryForm').addEventListener('submit', async function(e
         document.getElementById('coordinates').textContent = JSON.stringify(coordinates);
         document.getElementById('cells').textContent = cells.join(', ');
         document.getElementById('aggregator').textContent = aggregator;
-        document.getElementById('summary').textContent = summaryText;
+
+        // Create summary items
+        const summaryContainer = document.getElementById('summary');
+        summaryContainer.innerHTML = '';
+        summaryText.split('. ').forEach(sentence => {
+            if (sentence.trim()) {
+                const div = document.createElement('div');
+                div.className = 'summary-item';
+                div.textContent = sentence.trim() + '.';
+                summaryContainer.appendChild(div);
+            }
+        });
 
         responseElement.style.display = 'block';
 
